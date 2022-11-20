@@ -21,12 +21,12 @@ func TestGetCityData(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	want := city.CityData{
+	want := []city.CityData{{
 		Name:      "Tokyo",
 		Latitude:  35.6897,
 		Longitude: 139.692,
-	}
-	got, err := city.NewForTest(ts.Client(), ts.URL).GetCityData(context.Background(), "secret", "Tokyo")
+	}}
+	got, err := city.NewForTest(ts.Client(), ts.URL).GetCitiesData(context.Background(), "secret", "Tokyo")
 	assert.Equal(t, want, got)
 	assert.Nil(t, err)
 }

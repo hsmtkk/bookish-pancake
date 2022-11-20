@@ -11,7 +11,7 @@ import (
 	"github.com/hsmtkk/bookish-pancake/constant"
 )
 
-func GetCityData(ctx context.Context, apiKey, cityName string) (city.CityData, error) {
+func GetCityData(ctx context.Context, apiKey, cityName string) ([]city.CityData, error) {
 	tracer := otel.GetTracerProvider().Tracer(constant.ServiceName)
 	spanCtx, span := tracer.Start(ctx, "GetCityData")
 	defer span.End()
@@ -19,5 +19,5 @@ func GetCityData(ctx context.Context, apiKey, cityName string) (city.CityData, e
 	clt := &http.Client{
 		Transport: otelhttp.NewTransport(http.DefaultTransport),
 	}
-	return city.New(clt).GetCityData(spanCtx, apiKey, cityName)
+	return city.New(clt).GetCitiesData(spanCtx, apiKey, cityName)
 }
