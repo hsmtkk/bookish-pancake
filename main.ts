@@ -73,6 +73,7 @@ class MyStack extends TerraformStack {
     });
 
     new google.cloudRunServiceIamPolicy.CloudRunServiceIamPolicy(this, 'v1_backgrpc_policy', {
+      location: region,
       service: v1_backgrpc.name,
       policyData: no_auth_policy.policyData,
     });
@@ -94,6 +95,7 @@ class MyStack extends TerraformStack {
     });
 
     new google.cloudRunServiceIamPolicy.CloudRunServiceIamPolicy(this, 'v1_frontweb_policy', {
+      location: region,
       service: v1_frontweb.name,
       policyData: no_auth_policy.policyData,
     });
