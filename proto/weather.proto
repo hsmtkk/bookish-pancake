@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option go_package = "github.com/hsmtkk/bookish-pancake/proto";
+
+package proto;
+
+service WeatherService {
+    rpc GetWeather (WeatherRequest) returns (WeatherResponse) {}
+}
+
+message WeatherRequest {
+    string city = 1;
+}
+
+message WeatherResponse {
+    double temperature = 1;
+    int64 pressure = 2;
+    int64 humidity = 3;
+}
