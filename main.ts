@@ -64,7 +64,6 @@ class MyStack extends TerraformStack {
       role: 'roles/cloudprofiler.agent',
     });
 
-            /*
 
     const no_auth_policy = new google.dataGoogleIamPolicy.DataGoogleIamPolicy(this, 'cloud_run_no_auth_policy', {
       binding: [{
@@ -81,7 +80,7 @@ class MyStack extends TerraformStack {
       template: {
         spec: {
           containers: [{
-            image: 'asia-northeast1-docker.pkg.dev/bookish-pancake-369300/bookish-pancake/v1/backgrpc:latest',
+            image: 'us-docker.pkg.dev/cloudrun/container/hello', // Dummy. To be overwrite by Cloud Build.
           }],
           serviceAccountName: cloud_run_service_account.email,
         },
@@ -105,7 +104,7 @@ class MyStack extends TerraformStack {
               name: 'BACK_URL',
               value: v1_backgrpc.status.get(0).url,
             }],
-            image: 'asia-northeast1-docker.pkg.dev/bookish-pancake-369300/bookish-pancake/v1/frontweb:latest',
+            image: 'us-docker.pkg.dev/cloudrun/container/hello',
           }],
           serviceAccountName: cloud_run_service_account.email,
         },
@@ -125,7 +124,7 @@ class MyStack extends TerraformStack {
       template: {
         spec: {
           containers: [{
-            image: 'asia-northeast1-docker.pkg.dev/bookish-pancake-369300/bookish-pancake/v1/backgrpc:latest',
+            image: 'us-docker.pkg.dev/cloudrun/container/hello',
           }],
           serviceAccountName: cloud_run_service_account.email,
         },
@@ -149,7 +148,7 @@ class MyStack extends TerraformStack {
               name: 'BACK_URL',
               value: v2_backgrpc.status.get(0).url,
             }],
-            image: 'asia-northeast1-docker.pkg.dev/bookish-pancake-369300/bookish-pancake/v1/frontweb:latest',
+            image: 'us-docker.pkg.dev/cloudrun/container/hello',
           }],
           serviceAccountName: cloud_run_service_account.email,
         },
@@ -161,7 +160,6 @@ class MyStack extends TerraformStack {
       service: v2_frontweb.name,
       policyData: no_auth_policy.policyData,
     });
-    */
   }
 }
 
