@@ -46,11 +46,25 @@ class MyStack extends TerraformStack {
       displayName: 'service account for Cloud Run',
     });
 
-    new google.secretManagerSecretIamBinding.SecretManagerSecretIamBinding(this, 'back_service_secret_access', {
+    new google.secretManagerSecretIamBinding.SecretManagerSecretIamBinding(this, 'from_cloudrun_to_secretmanager', {
       secretId: openweather_api_key.id,
       members: [`serviceAccount:${cloud_run_service_account.email}`],
       role: 'roles/secretmanager.secretAccessor',
     });
+
+    new google.projectIamBinding.ProjectIamBinding(this, 'from_cloudrun_to_cloudtrace', {
+      members: [`serviceAccount:${cloud_run_service_account.email}`],
+      project,
+      role: 'roles/cloudtrace.agent',
+    });
+
+    new google.projectIamBinding.ProjectIamBinding(this, 'from_cloudrun_to_cloudprofiler', {
+      members: [`serviceAccount:${cloud_run_service_account.email}`],
+      project,
+      role: 'roles/cloudprofiler.agent',
+    });
+
+            /*
 
     const no_auth_policy = new google.dataGoogleIamPolicy.DataGoogleIamPolicy(this, 'cloud_run_no_auth_policy', {
       binding: [{
@@ -59,6 +73,7 @@ class MyStack extends TerraformStack {
       }],
     });
 
+    
     const v1_backgrpc = new google.cloudRunService.CloudRunService(this, 'v1_backgrpc', {
       autogenerateRevisionName: true,
       location: region,
@@ -79,7 +94,6 @@ class MyStack extends TerraformStack {
       policyData: no_auth_policy.policyData,
     });
 
-        /*
     const v1_frontweb = new google.cloudRunService.CloudRunService(this, 'v1_frontweb', {
       autogenerateRevisionName: true,
       location: region,
