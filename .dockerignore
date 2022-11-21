@@ -1,0 +1,4 @@
+.git
+__tests__
+cdktf.out
+node_modules

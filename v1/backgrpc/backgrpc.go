@@ -34,7 +34,7 @@ func (s *server) GetWeather(ctx context.Context, in *proto.WeatherRequest) (*pro
 }
 
 func main() {
-	apiKey, err := util.RequiredEnvVar("API_KEY")
+	apiKey, err := util.GetSecret(context.Background(), "openweather_api_key")
 	if err != nil {
 		log.Fatal(err)
 	}
