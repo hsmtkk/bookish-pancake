@@ -9,7 +9,7 @@ import (
 	"os"
 	"strconv"
 
-	"cloud.google.com/go/secretmanager/apiv1"
+	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/compute/v1"
@@ -79,5 +79,5 @@ func GetSecret(ctx context.Context, secretID string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("secretmanager.Client.AccessSecretVersion failed; %w", err)
 	}
-	return resp.Payload.String(), nil
+	return string(resp.Payload.Data), nil
 }
