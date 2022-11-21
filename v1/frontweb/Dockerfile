@@ -6,7 +6,8 @@ RUN go mod download
 COPY constant/ /go/src/app/constant/
 COPY openweather/ /go/src/app/openweather/
 COPY proto/ /go/src/app/proto/
-COPY util/ /go/src/app/util/
+COPY utilenv/ /go/src/app/utilenv/
+COPY utilgcp/ /go/src/app/utilgcp/
 COPY v1/ /go/src/app/v1/
 WORKDIR /go/src/app/v1/frontweb
 RUN CGO_ENABLED=0 go build -o app

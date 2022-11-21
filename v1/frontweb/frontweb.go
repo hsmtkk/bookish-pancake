@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 
 	"github.com/hsmtkk/bookish-pancake/proto"
-	"github.com/hsmtkk/bookish-pancake/util"
+	"github.com/hsmtkk/bookish-pancake/utilenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"google.golang.org/grpc"
@@ -16,20 +17,20 @@ import (
 )
 
 func main() {
-	backURL, err := util.RequiredEnvVar("BACK_URL")
+	backURL, err := utilenv.RequiredVar("BACK_URL")
 	if err != nil {
 		log.Fatal(err)
 	}
-	backHost, err := util.GetHostFromURL(backURL)
+	parsed, err := url.Parse(backURL)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("url.Parse failed; %v", err.Error())
 	}
-	port, err := util.GetPort()
+	port, err := utilenv.GetPort()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	hdl, err := newHandler(backHost)
+	hdl, err := newHandler(parsed.Host)
 	if err != nil {
 		log.Fatal(err)
 	}

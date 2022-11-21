@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/hsmtkk/bookish-pancake/openweather"
-	"github.com/hsmtkk/bookish-pancake/util"
+	"github.com/hsmtkk/bookish-pancake/utilenv"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +23,7 @@ func main() {
 }
 
 func run(cmd *cobra.Command, args []string) {
-	apiKey, err := util.RequiredEnvVar("API_KEY")
+	apiKey, err := utilenv.RequiredVar("API_KEY")
 	if err != nil {
 		log.Fatal(err)
 	}

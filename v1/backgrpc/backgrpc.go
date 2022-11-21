@@ -7,7 +7,8 @@ import (
 	"net"
 
 	"github.com/hsmtkk/bookish-pancake/proto"
-	"github.com/hsmtkk/bookish-pancake/util"
+	"github.com/hsmtkk/bookish-pancake/utilenv"
+	gcp "github.com/hsmtkk/bookish-pancake/utilgcp"
 	"github.com/hsmtkk/bookish-pancake/v1/openweather"
 	"google.golang.org/grpc"
 )
@@ -34,11 +35,11 @@ func (s *server) GetWeather(ctx context.Context, in *proto.WeatherRequest) (*pro
 }
 
 func main() {
-	apiKey, err := util.GetSecret(context.Background(), "openweather_api_key")
+	apiKey, err := gcp.GetSecret(context.Background(), "openweather_api_key")
 	if err != nil {
 		log.Fatal(err)
 	}
-	port, err := util.GetPort()
+	port, err := utilenv.GetPort()
 	if err != nil {
 		log.Fatal(err)
 	}

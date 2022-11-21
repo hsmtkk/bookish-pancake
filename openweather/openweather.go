@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 
-	"github.com/hsmtkk/bookish-pancake/util"
+	"github.com/hsmtkk/bookish-pancake/util/http"
 )
 
 type WeatherDataMain struct {
@@ -49,9 +50,12 @@ func (i *impl) GetCurrentWeather(ctx context.Context, apiKey, city string) (Weat
 		return result, fmt.Errorf("http.Client.Do failed; %w", err)
 	}
 	defer resp.Body.Close()
-	bs, err := util.HandleHTTPResponse(resp)
+	if resp.StatusCode != http.StatusOK {
+		return result, fmt.Errorf("non 200 HTTP status code; %d; %s", resp.StatusCode, resp.Status)
+	}
+	bs, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return result, err
+		return result, fmt.Errorf("io.ReadAll failed; %w", err)
 	}
 	if err := json.Unmarshal(bs, &result); err != nil {
 		return result, fmt.Errorf("json.Unmarshal failed; %w", err)
