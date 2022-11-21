@@ -22,6 +22,7 @@ func newServer(apiKey string) *server {
 }
 
 func (s *server) GetWeather(ctx context.Context, in *proto.WeatherRequest) (*proto.WeatherResponse, error) {
+	log.Print("backgrpc.GetWeather called") // debug
 	data, err := openweather.GetCurrentWeather(ctx, s.apiKey, in.GetCity())
 	if err != nil {
 		return nil, err
