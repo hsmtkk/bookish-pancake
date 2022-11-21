@@ -60,6 +60,7 @@ class MyStack extends TerraformStack {
     });
 
     const v1_backgrpc = new google.cloudRunService.CloudRunService(this, 'v1_backgrpc', {
+      autogenerateRevisionName: true,
       location: region,
       name: 'v1-backgrpc',
       template: {
@@ -79,6 +80,7 @@ class MyStack extends TerraformStack {
     });
 
     const v1_frontweb = new google.cloudRunService.CloudRunService(this, 'v1_frontweb', {
+      autogenerateRevisionName: true,
       location: region,
       name: 'v1-frontweb',
       template: {
@@ -101,6 +103,7 @@ class MyStack extends TerraformStack {
     });
 
     const v2_backgrpc = new google.cloudRunService.CloudRunService(this, 'v2_backgrpc', {
+      autogenerateRevisionName: true,
       location: region,
       name: 'v2-backgrpc',
       template: {
@@ -120,6 +123,7 @@ class MyStack extends TerraformStack {
     });
 
     const v2_frontweb = new google.cloudRunService.CloudRunService(this, 'v2_frontweb', {
+      autogenerateRevisionName: true,
       location: region,
       name: 'v2-frontweb',
       template: {
