@@ -3,14 +3,14 @@ steps:
     args:
       - --cache=true
       - --cache-ttl=24h
-      - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/backgrpc:latest
-      - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/backgrpc:$COMMIT_SHA
+      - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v1/backgrpc:latest
+      - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v1/backgrpc:$COMMIT_SHA
       - --dockerfile=v1/backgrpc/Dockerfile
 
   - name: gcr.io/kaniko-project/executor:latest
     args:
       - --cache=true
       - --cache-ttl=24h
-      - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/frontweb:latest
-      - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/frontweb:$COMMIT_SHA
+      - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v1/frontweb:latest
+      - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v1/frontweb:$COMMIT_SHA
       - --dockerfile=v1/frontweb/Dockerfile

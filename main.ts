@@ -31,6 +31,7 @@ class MyStack extends TerraformStack {
     });
 
     new google.cloudbuildTrigger.CloudbuildTrigger(this, 'build_trigger', {
+      filename: 'cloudbuild.yaml',
       github: {
         owner: 'hsmtkk',
         name: repository,
@@ -38,6 +39,51 @@ class MyStack extends TerraformStack {
           branch: 'main',
         },
       },
+    });
+
+    const no_auth_policy = new google.dataGoogleIamPolicy.DataGoogleIamPolicy(this, 'no_auth_policy', {
+      binding: [{
+        role: 'roles/run.invoker',
+        members: ['allUsers'],
+      }],
+    });
+
+    const v1_backgrpc = new google.cloudRunService.CloudRunService(this, 'v1_backgrpc', {
+      location: region,
+      name: 'v1-backgrpc',
+      template: {
+        spec: {
+          containers: [{
+            image: 'asia-northeast1-docker.pkg.dev/bookish-pancake-369300/bookish-pancake/v1/backgrpc:latest',
+          }],
+        },
+      }
+    });
+
+    new google.cloudRunServiceIamPolicy.CloudRunServiceIamPolicy(this, 'v1_backgrpc_policy', {
+      service: v1_backgrpc.name,
+      policyData: no_auth_policy.policyData,
+    });
+
+    const v1_frontweb = new google.cloudRunService.CloudRunService(this, 'v1_frontweb', {
+      location: region,
+      name: 'v1-frontweb',
+      template: {
+        spec: {
+          containers: [{
+            env: [{
+              name: 'BACK_URL',
+              value: v1_backgrpc.status.get(0).url,
+            }],
+            image: 'asia-northeast1-docker.pkg.dev/bookish-pancake-369300/bookish-pancake/v1/frontweb:latest',
+          }],
+        },
+      }
+    });
+
+    new google.cloudRunServiceIamPolicy.CloudRunServiceIamPolicy(this, 'v1_frontweb_policy', {
+      service: v1_frontweb.name,
+      policyData: no_auth_policy.policyData,
     });
   }
 }
