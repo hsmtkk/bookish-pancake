@@ -34,7 +34,7 @@ steps:
 
   - name: gcr.io/google.com/cloudsdktool/cloud-sdk
     id: v1-front-deploy
-    wait: ['v1-front-build']
+    waitFor: ['v1-front-build']
     entrypoint: gcloud
     args:
       - run
