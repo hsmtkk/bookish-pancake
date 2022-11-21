@@ -11,6 +11,7 @@ import (
 	"github.com/hsmtkk/bookish-pancake/utilenv"
 	"github.com/hsmtkk/bookish-pancake/utilgcp"
 	"github.com/hsmtkk/bookish-pancake/v2/openweather"
+	"github.com/hsmtkk/bookish-pancake/v2/profiler"
 	"github.com/hsmtkk/bookish-pancake/v2/provider"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
@@ -51,6 +52,9 @@ func (s *server) GetWeather(ctx context.Context, in *proto.WeatherRequest) (*pro
 
 func main() {
 	ctx := context.Background()
+	if err := profiler.Start(ctx); err != nil {
+		log.Fatal(err)
+	}
 	prov, err := provider.Provider(ctx)
 	if err != nil {
 		log.Fatal(err)

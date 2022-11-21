@@ -12,6 +12,7 @@ import (
 	"github.com/hsmtkk/bookish-pancake/constant"
 	"github.com/hsmtkk/bookish-pancake/proto"
 	"github.com/hsmtkk/bookish-pancake/utilenv"
+	"github.com/hsmtkk/bookish-pancake/v2/profiler"
 	"github.com/hsmtkk/bookish-pancake/v2/provider"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -32,6 +33,9 @@ func init() {
 
 func main() {
 	ctx := context.Background()
+	if err := profiler.Start(ctx); err != nil {
+		log.Fatal(err)
+	}
 	prov, err := provider.Provider(ctx)
 	if err != nil {
 		log.Fatal(err)
