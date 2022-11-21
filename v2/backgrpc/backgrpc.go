@@ -6,12 +6,24 @@ import (
 	"log"
 	"net"
 
+	"github.com/hsmtkk/bookish-pancake/constant"
 	"github.com/hsmtkk/bookish-pancake/proto"
 	"github.com/hsmtkk/bookish-pancake/utilenv"
-	gcp "github.com/hsmtkk/bookish-pancake/utilgcp"
-	"github.com/hsmtkk/bookish-pancake/v1/openweather"
+	"github.com/hsmtkk/bookish-pancake/utilgcp"
+	"github.com/hsmtkk/bookish-pancake/v2/openweather"
+	"github.com/hsmtkk/bookish-pancake/v2/provider"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 )
+
+var tracer trace.Tracer
+
+func init() {
+	tracer = otel.Tracer(constant.ServiceName)
+}
 
 type server struct {
 	proto.UnimplementedWeatherServiceServer
@@ -23,7 +35,10 @@ func newServer(apiKey string) *server {
 }
 
 func (s *server) GetWeather(ctx context.Context, in *proto.WeatherRequest) (*proto.WeatherResponse, error) {
-	data, err := openweather.GetCurrentWeather(ctx, s.apiKey, in.GetCity())
+	spanCtx, span := tracer.Start(ctx, "GetWeather")
+	defer span.End()
+
+	data, err := openweather.GetCurrentWeather(spanCtx, s.apiKey, in.GetCity())
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +50,16 @@ func (s *server) GetWeather(ctx context.Context, in *proto.WeatherRequest) (*pro
 }
 
 func main() {
-	apiKey, err := gcp.GetSecret(context.Background(), "openweather_api_key")
+	ctx := context.Background()
+	prov, err := provider.Provider(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer prov.ForceFlush(ctx)
+	otel.SetTracerProvider(prov)
+	otel.SetTextMapPropagator(propagation.TraceContext{})
+
+	apiKey, err := utilgcp.GetSecret(context.Background(), "openweather_api_key")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -47,7 +71,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("net.Listen failed; %v", err.Error())
 	}
-	s := grpc.NewServer()
+	s := grpc.NewServer(grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()), grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()))
 	proto.RegisterWeatherServiceServer(s, newServer(apiKey))
 	if err := s.Serve(lis); err != nil {
 		log.Fatal(err)

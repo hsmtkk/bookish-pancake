@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -8,15 +9,37 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/hsmtkk/bookish-pancake/constant"
 	"github.com/hsmtkk/bookish-pancake/proto"
 	"github.com/hsmtkk/bookish-pancake/utilenv"
+	"github.com/hsmtkk/bookish-pancake/v2/provider"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
 
+var tracer trace.Tracer
+
+func init() {
+	tracer = otel.Tracer(constant.ServiceName)
+}
+
 func main() {
+	ctx := context.Background()
+	prov, err := provider.Provider(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer prov.ForceFlush(ctx)
+	otel.SetTracerProvider(prov)
+	otel.SetTextMapPropagator(propagation.TraceContext{})
+
 	backURL, err := utilenv.RequiredVar("BACK_URL")
 	if err != nil {
 		log.Fatal(err)
@@ -41,6 +64,7 @@ func main() {
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(otelecho.Middleware(constant.ServiceName))
 
 	// Routes
 	e.GET("/", hdl.getIndex)
@@ -62,7 +86,7 @@ func newHandler(backHost string) (*handler, error) {
 	cred := credentials.NewTLS(&tls.Config{
 		RootCAs: systemRoots,
 	})
-	grpcConn, err := grpc.Dial(fmt.Sprintf("%s:443", backHost), grpc.WithTransportCredentials(cred))
+	grpcConn, err := grpc.Dial(fmt.Sprintf("%s:443", backHost), grpc.WithTransportCredentials(cred), grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()), grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()))
 	if err != nil {
 		return nil, fmt.Errorf("grpc.Dial failed; %w", err)
 	}
@@ -81,6 +105,9 @@ const indexHTML = `<html>
 `
 
 func (h *handler) getIndex(ectx echo.Context) error {
+	_, span := tracer.Start(ectx.Request().Context(), "getIndex")
+	defer span.End()
+
 	return ectx.HTML(http.StatusOK, indexHTML)
 }
 
@@ -95,8 +122,11 @@ const postHTML = `<html>
 </html>`
 
 func (h *handler) postIndex(ectx echo.Context) error {
+	spanCtx, span := tracer.Start(ectx.Request().Context(), "getIndex")
+	defer span.End()
+
 	city := ectx.FormValue("city")
-	resp, err := h.grpcClient.GetWeather(ectx.Request().Context(), &proto.WeatherRequest{City: city})
+	resp, err := h.grpcClient.GetWeather(spanCtx, &proto.WeatherRequest{City: city})
 	if err != nil {
 		return fmt.Errorf("proto.WeatherServiceClient.GetWeather failed; %w", err)
 	}
