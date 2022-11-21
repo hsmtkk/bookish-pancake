@@ -36,3 +36,41 @@ steps:
       - asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v1/frontweb:$COMMIT_SHA
       - --region
       - asia-northeast1
+
+  - name: gcr.io/kaniko-project/executor:latest
+    args:
+      - --cache=true
+      - --cache-ttl=24h
+      - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v2/backgrpc:latest
+      - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v2/backgrpc:$COMMIT_SHA
+      - --dockerfile=v2/backgrpc/Dockerfile
+
+  - name: gcr.io/kaniko-project/executor:latest
+    args:
+      - --cache=true
+      - --cache-ttl=24h
+      - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v2/frontweb:latest
+      - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v2/frontweb:$COMMIT_SHA
+      - --dockerfile=v2/frontweb/Dockerfile
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - v2-backgrpc
+      - --image
+      - asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v2/backgrpc:$COMMIT_SHA
+      - --region
+      - asia-northeast1
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - v2-frontweb
+      - --image
+      - asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v2/frontweb:$COMMIT_SHA
+      - --region
+      - asia-northeast1

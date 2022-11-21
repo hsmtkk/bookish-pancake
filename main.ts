@@ -99,6 +99,47 @@ class MyStack extends TerraformStack {
       service: v1_frontweb.name,
       policyData: no_auth_policy.policyData,
     });
+
+    const v2_backgrpc = new google.cloudRunService.CloudRunService(this, 'v2_backgrpc', {
+      location: region,
+      name: 'v2-backgrpc',
+      template: {
+        spec: {
+          containers: [{
+            image: 'asia-northeast1-docker.pkg.dev/bookish-pancake-369300/bookish-pancake/v2/backgrpc:latest',
+          }],
+          serviceAccountName: back_service_account.email,
+        },
+      }
+    });
+
+    new google.cloudRunServiceIamPolicy.CloudRunServiceIamPolicy(this, 'v2_backgrpc_policy', {
+      location: region,
+      service: v2_backgrpc.name,
+      policyData: no_auth_policy.policyData,
+    });
+
+    const v2_frontweb = new google.cloudRunService.CloudRunService(this, 'v2_frontweb', {
+      location: region,
+      name: 'v2-frontweb',
+      template: {
+        spec: {
+          containers: [{
+            env: [{
+              name: 'BACK_URL',
+              value: v2_backgrpc.status.get(0).url,
+            }],
+            image: 'asia-northeast1-docker.pkg.dev/bookish-pancake-369300/bookish-pancake/v2/frontweb:latest',
+          }],
+        },
+      }
+    });
+
+    new google.cloudRunServiceIamPolicy.CloudRunServiceIamPolicy(this, 'v2_frontweb_policy', {
+      location: region,
+      service: v2_frontweb.name,
+      policyData: no_auth_policy.policyData,
+    });
   }
 }
 
