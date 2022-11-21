@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-
-	"github.com/hsmtkk/bookish-pancake/util/http"
 )
 
 type WeatherDataMain struct {
