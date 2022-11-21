@@ -79,6 +79,7 @@ class MyStack extends TerraformStack {
       policyData: no_auth_policy.policyData,
     });
 
+        /*
     const v1_frontweb = new google.cloudRunService.CloudRunService(this, 'v1_frontweb', {
       autogenerateRevisionName: true,
       location: region,
@@ -146,6 +147,7 @@ class MyStack extends TerraformStack {
       service: v2_frontweb.name,
       policyData: no_auth_policy.policyData,
     });
+    */
   }
 }
 
