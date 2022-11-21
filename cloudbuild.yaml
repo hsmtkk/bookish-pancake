@@ -4,7 +4,7 @@ steps:
     waitFor: ['-']
     args:
       - --cache=true
-      - --cache-ttl=24h
+      - --cache-ttl=168h
       - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v1/backgrpc:latest
       - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v1/backgrpc:$COMMIT_SHA
       - --dockerfile=v1/backgrpc/Dockerfile
@@ -14,7 +14,7 @@ steps:
     waitFor: ['-']
     args:
       - --cache=true
-      - --cache-ttl=24h
+      - --cache-ttl=168h
       - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v1/frontweb:latest
       - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v1/frontweb:$COMMIT_SHA
       - --dockerfile=v1/frontweb/Dockerfile
@@ -50,7 +50,7 @@ steps:
     waitFor: ['-']
     args:
       - --cache=true
-      - --cache-ttl=24h
+      - --cache-ttl=168h
       - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v2/backgrpc:latest
       - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v2/backgrpc:$COMMIT_SHA
       - --dockerfile=v2/backgrpc/Dockerfile
@@ -60,7 +60,7 @@ steps:
     waitFor: ['-']
     args:
       - --cache=true
-      - --cache-ttl=24h
+      - --cache-ttl=168h
       - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v2/frontweb:latest
       - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v2/frontweb:$COMMIT_SHA
       - --dockerfile=v2/frontweb/Dockerfile
