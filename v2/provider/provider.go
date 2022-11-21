@@ -34,6 +34,7 @@ func Provider(ctx context.Context) (*sdktrace.TracerProvider, error) {
 	}
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithBatcher(exporter),
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 		sdktrace.WithResource(res),
 	)
 	return tp, err
