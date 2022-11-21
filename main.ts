@@ -80,7 +80,7 @@ class MyStack extends TerraformStack {
       template: {
         spec: {
           containers: [{
-            image: 'us-docker.pkg.dev/cloudrun/container/hello', // Dummy. To be overwrite by Cloud Build.
+            image: 'us-docker.pkg.dev/cloudrun/container/hello', // Placeholder. To be overwritten by Cloud Build.
           }],
           serviceAccountName: cloud_run_service_account.email,
         },
