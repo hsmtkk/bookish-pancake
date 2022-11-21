@@ -3,6 +3,7 @@ module github.com/hsmtkk/bookish-pancake
 go 1.19
 
 require (
+	cloud.google.com/go/monitoring v1.7.0
 	cloud.google.com/go/profiler v0.3.0
 	cloud.google.com/go/secretmanager v1.9.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.10.1
@@ -18,6 +19,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.11.1
 	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783
 	google.golang.org/api v0.103.0
+	google.golang.org/genproto v0.0.0-20221027153422-115e99e71e1c
 	google.golang.org/grpc v1.51.0
 	google.golang.org/protobuf v1.28.1
 )
@@ -60,6 +62,5 @@ require (
 	golang.org/x/text v0.4.0 // indirect
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20221027153422-115e99e71e1c // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

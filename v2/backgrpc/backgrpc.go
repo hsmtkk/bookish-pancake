@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 
+	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
+	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
 	"github.com/hsmtkk/bookish-pancake/constant"
 	"github.com/hsmtkk/bookish-pancake/proto"
 	"github.com/hsmtkk/bookish-pancake/utilenv"
@@ -17,7 +20,9 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/genproto/googleapis/api/metric"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var tracer trace.Tracer
@@ -39,15 +44,62 @@ func (s *server) GetWeather(ctx context.Context, in *proto.WeatherRequest) (*pro
 	spanCtx, span := tracer.Start(ctx, "GetWeather")
 	defer span.End()
 
+	before := time.Now()
 	data, err := openweather.GetCurrentWeather(spanCtx, s.apiKey, in.GetCity())
 	if err != nil {
 		return nil, err
 	}
+	elapsed := time.Since(before)
+	if err := s.recordWebLatency(spanCtx, elapsed.Milliseconds()); err != nil {
+		log.Printf("error: %v", err.Error())
+	}
+
 	return &proto.WeatherResponse{
 		Temperature: data.Main.Temperature,
 		Pressure:    int64(data.Main.Pressure),
 		Humidity:    int64(data.Main.Humidity),
 	}, nil
+}
+
+const metricType = "custom.googleapis.com/weblatency"
+
+func (s *server) recordWebLatency(ctx context.Context, latencyMilliSeconds int64) error {
+	spanCtx, span := tracer.Start(ctx, "recordWebLatency")
+	defer span.End()
+
+	projectID, err := utilgcp.ProjectID(spanCtx)
+	if err != nil {
+		return err
+	}
+	clt, err := monitoring.NewMetricClient(spanCtx)
+	if err != nil {
+		return fmt.Errorf("monitoring.NewMetricClient failed; %w", err)
+	}
+	defer clt.Close()
+	now := timestamppb.Now()
+	req := monitoringpb.CreateTimeSeriesRequest{
+		Name: "projects/" + projectID,
+		TimeSeries: []*monitoringpb.TimeSeries{{
+			Metric: &metric.Metric{
+				Type: metricType,
+			},
+			Points: []*monitoringpb.Point{{
+				Interval: &monitoringpb.TimeInterval{
+					StartTime: now,
+					EndTime:   now,
+				},
+				Value: &monitoringpb.TypedValue{
+					Value: &monitoringpb.TypedValue_Int64Value{
+						Int64Value: latencyMilliSeconds,
+					},
+				},
+			}},
+		}},
+	}
+	if err := clt.CreateTimeSeries(spanCtx, &req); err != nil {
+		return fmt.Errorf("monitoring.MetricClient.CreateTimeSeries failed; %w", err)
+	}
+	return nil
 }
 
 func main() {
