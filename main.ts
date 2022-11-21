@@ -41,14 +41,14 @@ class MyStack extends TerraformStack {
       },
     });
 
-    const back_service_account = new google.serviceAccount.ServiceAccount(this, 'back_service_account', {
-      accountId: 'back-service-account',
-      displayName: 'service account for back gRPC service',
+    const cloud_run_service_account = new google.serviceAccount.ServiceAccount(this, 'cloud_run_service_account', {
+      accountId: 'cloud-run-service-account',
+      displayName: 'service account for Cloud Run',
     });
 
     new google.secretManagerSecretIamBinding.SecretManagerSecretIamBinding(this, 'back_service_secret_access', {
       secretId: openweather_api_key.id,
-      members: [`serviceAccount:${back_service_account.email}`],
+      members: [`serviceAccount:${cloud_run_service_account.email}`],
       role: 'roles/secretmanager.secretAccessor',
     });
 
@@ -68,7 +68,7 @@ class MyStack extends TerraformStack {
           containers: [{
             image: 'asia-northeast1-docker.pkg.dev/bookish-pancake-369300/bookish-pancake/v1/backgrpc:latest',
           }],
-          serviceAccountName: back_service_account.email,
+          serviceAccountName: cloud_run_service_account.email,
         },
       }
     });
@@ -92,6 +92,7 @@ class MyStack extends TerraformStack {
             }],
             image: 'asia-northeast1-docker.pkg.dev/bookish-pancake-369300/bookish-pancake/v1/frontweb:latest',
           }],
+          serviceAccountName: cloud_run_service_account.email,
         },
       }
     });
@@ -109,9 +110,9 @@ class MyStack extends TerraformStack {
       template: {
         spec: {
           containers: [{
-            image: 'asia-northeast1-docker.pkg.dev/bookish-pancake-369300/bookish-pancake/v2/backgrpc:latest',
+            image: 'asia-northeast1-docker.pkg.dev/bookish-pancake-369300/bookish-pancake/v1/backgrpc:latest',
           }],
-          serviceAccountName: back_service_account.email,
+          serviceAccountName: cloud_run_service_account.email,
         },
       }
     });
@@ -133,8 +134,9 @@ class MyStack extends TerraformStack {
               name: 'BACK_URL',
               value: v2_backgrpc.status.get(0).url,
             }],
-            image: 'asia-northeast1-docker.pkg.dev/bookish-pancake-369300/bookish-pancake/v2/frontweb:latest',
+            image: 'asia-northeast1-docker.pkg.dev/bookish-pancake-369300/bookish-pancake/v1/frontweb:latest',
           }],
+          serviceAccountName: cloud_run_service_account.email,
         },
       }
     });
