@@ -1,5 +1,7 @@
 steps:
   - name: gcr.io/kaniko-project/executor:latest
+    id: v1-back-build
+    waitFor: ['-']
     args:
       - --cache=true
       - --cache-ttl=24h
@@ -8,6 +10,8 @@ steps:
       - --dockerfile=v1/backgrpc/Dockerfile
 
   - name: gcr.io/kaniko-project/executor:latest
+    id: v1-front-build
+    waitFor: ['-']
     args:
       - --cache=true
       - --cache-ttl=24h
@@ -16,6 +20,8 @@ steps:
       - --dockerfile=v1/frontweb/Dockerfile
 
   - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    id: v1-back-deploy
+    waitFor: ['v1-back-build']
     entrypoint: gcloud
     args:
       - run
@@ -27,6 +33,8 @@ steps:
       - asia-northeast1
 
   - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    id: v1-front-deploy
+    wait: ['v1-front-build']
     entrypoint: gcloud
     args:
       - run
@@ -38,6 +46,8 @@ steps:
       - asia-northeast1
 
   - name: gcr.io/kaniko-project/executor:latest
+    id: v2-back-build
+    waitFor: ['-']
     args:
       - --cache=true
       - --cache-ttl=24h
@@ -46,6 +56,8 @@ steps:
       - --dockerfile=v2/backgrpc/Dockerfile
 
   - name: gcr.io/kaniko-project/executor:latest
+    id: v2-front-build
+    waitFor: ['-']
     args:
       - --cache=true
       - --cache-ttl=24h
@@ -54,6 +66,8 @@ steps:
       - --dockerfile=v2/frontweb/Dockerfile
 
   - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    id: v2-back-deploy
+    waitFor: ['v2-back-build']
     entrypoint: gcloud
     args:
       - run
@@ -65,6 +79,8 @@ steps:
       - asia-northeast1
 
   - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    id: v2-front-deploy
+    waitFor: ['v2-front-build']
     entrypoint: gcloud
     args:
       - run
