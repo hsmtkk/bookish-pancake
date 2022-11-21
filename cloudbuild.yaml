@@ -14,3 +14,25 @@ steps:
       - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v1/frontweb:latest
       - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v1/frontweb:$COMMIT_SHA
       - --dockerfile=v1/frontweb/Dockerfile
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - v1-backgrpc
+      - --image
+      - asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v1/backgrpc:$COMMIT_SHA
+      - --region
+      - asia-northeast1
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - v1-frontweb
+      - --image
+      - asia-northeast1-docker.pkg.dev/$PROJECT_ID/bookish-pancake/v1/frontweb:$COMMIT_SHA
+      - --region
+      - asia-northeast1
