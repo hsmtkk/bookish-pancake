@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/hsmtkk/bookish-pancake/util"
@@ -39,7 +38,6 @@ func NewForTest(clt *http.Client, baseURL string) CurrentWeatherGetter {
 }
 
 func (i *impl) GetCurrentWeather(ctx context.Context, apiKey, city string) (WeatherData, error) {
-	log.Print("openweather.GetCurrentWeather called") // debug
 	url := fmt.Sprintf("%s/data/2.5/weather?q=%s&appid=%s", i.baseURL, city, apiKey)
 	var result WeatherData
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
