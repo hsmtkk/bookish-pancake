@@ -23,13 +23,6 @@ class MyStack extends TerraformStack {
       repositoryId: repository,
     });
 
-    new google.secretManagerSecret.SecretManagerSecret(this, 'openweather_api_key', {
-      secretId: 'openweather_api_key',
-      replication: {
-        automatic: true,
-      },
-    });
-
     new google.cloudbuildTrigger.CloudbuildTrigger(this, 'build_trigger', {
       filename: 'cloudbuild.yaml',
       github: {
@@ -41,7 +34,25 @@ class MyStack extends TerraformStack {
       },
     });
 
-    const no_auth_policy = new google.dataGoogleIamPolicy.DataGoogleIamPolicy(this, 'no_auth_policy', {
+    const openweather_api_key = new google.secretManagerSecret.SecretManagerSecret(this, 'openweather_api_key', {
+      secretId: 'openweather_api_key',
+      replication: {
+        automatic: true,
+      },
+    });
+
+    const back_service_account = new google.serviceAccount.ServiceAccount(this, 'back_service_account', {
+      accountId: 'back-service-account',
+      displayName: 'service account for back gRPC service',
+    });
+
+    new google.secretManagerSecretIamBinding.SecretManagerSecretIamBinding(this, 'back_service_secret_access', {
+      secretId: openweather_api_key.id,
+      members: [`serviceAccount:${back_service_account.email}`],
+      role: 'roles/secretmanager.secretAccessor',
+    });
+
+    const no_auth_policy = new google.dataGoogleIamPolicy.DataGoogleIamPolicy(this, 'cloud_run_no_auth_policy', {
       binding: [{
         role: 'roles/run.invoker',
         members: ['allUsers'],
@@ -56,6 +67,7 @@ class MyStack extends TerraformStack {
           containers: [{
             image: 'asia-northeast1-docker.pkg.dev/bookish-pancake-369300/bookish-pancake/v1/backgrpc:latest',
           }],
+          serviceAccountName: back_service_account.email,
         },
       }
     });
