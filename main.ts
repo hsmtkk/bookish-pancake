@@ -64,6 +64,11 @@ class MyStack extends TerraformStack {
       role: 'roles/cloudprofiler.agent',
     });
 
+    new google.projectIamBinding.ProjectIamBinding(this, 'from_cloudrun_to_cloudmonitoring', {
+      members: [`serviceAccount:${cloud_run_service_account.email}`],
+      project,
+      role: 'roles/monitoring.metricWriter',
+    });
 
     const no_auth_policy = new google.dataGoogleIamPolicy.DataGoogleIamPolicy(this, 'cloud_run_no_auth_policy', {
       binding: [{
@@ -72,7 +77,6 @@ class MyStack extends TerraformStack {
       }],
     });
 
-    
     const v1_backgrpc = new google.cloudRunService.CloudRunService(this, 'v1_backgrpc', {
       autogenerateRevisionName: true,
       location: region,
@@ -85,12 +89,6 @@ class MyStack extends TerraformStack {
           serviceAccountName: cloud_run_service_account.email,
         },
       }
-    });
-
-    new google.cloudRunServiceIamPolicy.CloudRunServiceIamPolicy(this, 'v1_backgrpc_policy', {
-      location: region,
-      service: v1_backgrpc.name,
-      policyData: no_auth_policy.policyData,
     });
 
     const v1_frontweb = new google.cloudRunService.CloudRunService(this, 'v1_frontweb', {
@@ -111,12 +109,6 @@ class MyStack extends TerraformStack {
       }
     });
 
-    new google.cloudRunServiceIamPolicy.CloudRunServiceIamPolicy(this, 'v1_frontweb_policy', {
-      location: region,
-      service: v1_frontweb.name,
-      policyData: no_auth_policy.policyData,
-    });
-
     const v2_backgrpc = new google.cloudRunService.CloudRunService(this, 'v2_backgrpc', {
       autogenerateRevisionName: true,
       location: region,
@@ -129,12 +121,6 @@ class MyStack extends TerraformStack {
           serviceAccountName: cloud_run_service_account.email,
         },
       }
-    });
-
-    new google.cloudRunServiceIamPolicy.CloudRunServiceIamPolicy(this, 'v2_backgrpc_policy', {
-      location: region,
-      service: v2_backgrpc.name,
-      policyData: no_auth_policy.policyData,
     });
 
     const v2_frontweb = new google.cloudRunService.CloudRunService(this, 'v2_frontweb', {
@@ -155,11 +141,14 @@ class MyStack extends TerraformStack {
       }
     });
 
-    new google.cloudRunServiceIamPolicy.CloudRunServiceIamPolicy(this, 'v2_frontweb_policy', {
-      location: region,
-      service: v2_frontweb.name,
-      policyData: no_auth_policy.policyData,
-    });
+    for(const svc of [v1_backgrpc, v1_frontweb, v2_backgrpc, v2_frontweb]){
+      const resource_id = `${svc}_policy`;
+      new google.cloudRunServiceIamPolicy.CloudRunServiceIamPolicy(this, resource_id, {
+        location: region,
+        service: svc.name,
+        policyData: no_auth_policy.policyData,
+      });
+    }
   }
 }
 
