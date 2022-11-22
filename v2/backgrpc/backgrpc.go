@@ -51,7 +51,7 @@ func (s *server) GetWeather(ctx context.Context, in *proto.WeatherRequest) (*pro
 	}
 	elapsed := time.Since(before)
 	if err := s.recordWebLatency(spanCtx, elapsed.Milliseconds()); err != nil {
-		log.Printf("error: %v", err.Error())
+		log.Printf("error: %v", err.Error()) // accept error
 	}
 
 	return &proto.WeatherResponse{
